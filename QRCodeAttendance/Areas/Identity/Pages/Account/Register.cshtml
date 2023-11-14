@@ -1,0 +1,167 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="bg-img-cover" style="background-image: url('/new/assets/img/bg-scene.svg')">
+    <div id="layoutAuthentication">
+        <div id="layoutAuthentication_content">
+            <main>
+                <div class="container-xl px-4">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-8 col-lg-9">
+                            <!-- Social registration form-->
+                            <div class="card my-5 rounded-xl">
+                                <div class="card-body p-5 text-center">
+                                    <div class="text-center mx-3">
+                                        <a asp-area="" asp-controller="Home" asp-action="Index">
+                                            <img class="mb-2" src="~/new/assets/img/SCANME1.png" style="height:150px" alt="Logo">
+                                        </a>
+                                    </div>
+                                    <div class="h3 fw-light mb-3">Create an Account</div>
+                                    <div class="small text-muted mb-2">Sign in using...</div>
+                                    @{
+                                        if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                                        {
+                                            <div>
+                                                <p>
+                                                    There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">
+                                                        article
+                                                        about setting up this ASP.NET application to support logging in via external services
+                                                    </a>.
+                                                </p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                <div>
+                                                    <p>
+                                                        @foreach (var provider in Model.ExternalLogins!)
+                                                        {
+                                                            if (provider.Name == "Google")
+                                                            {
+                                                                <button type="submit" class="btn btn-icon btn-google mx-1" value="@provider.Name"
+                                                                        title="Log in using your @provider.DisplayName account" name="provider">
+
+                                                                    <i class="fab fa-google fa-fw fa-sm" style=""></i>
+                                                                </button>
+
+                                                            }
+                                                            else if (provider.Name == "Facebook")
+                                                            {
+                                                                <button class="btn btn-icon btn-facebook mx-1" type="submit" value="@provider.Name"
+                                                                        title="Log in using your @provider.DisplayName account" name="provider">
+
+                                                                    <i class="fab fa-facebook-f fa-fw fa-sm"></i>
+                                                                </button>
+
+                                                            }
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </form>
+                                        }
+                                    }
+                                </div>
+                                <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+                                <hr class="my-0" />
+                                <div class="card-body p-5">
+                                    <div class="text-center small text-muted mb-4">...or enter your information below.</div>
+                                    <!-- Login form-->
+                                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" enctype="multipart/form-data">
+                                        <!-- Form Row-->
+                                        <div class="row gx-3">
+                                            <div class="col-md-6">
+                                                <!-- Form Group (first name)-->
+                                                <div class="mb-3">
+                                                    <label class="text-gray-600 small" for="firstNameExample">First name</label>
+                                                    <input asp-for="Input.First" class="form-control form-control-solid" type="text" placeholder="Enter your First Name" aria-label="First Name" aria-describedby="firstNameExample" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <!-- Form Group (last name)-->
+                                                <div class="mb-3">
+                                                    <label class="text-gray-600 small" for="lastNameExample">Last name</label>
+                                                    <input asp-for="Input.Last" class="form-control form-control-solid" type="text" placeholder="Enter your Last Name" aria-label="Last Name" aria-describedby="lastNameExample" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Form Group (email address)-->
+                                        <div class="mb-3">
+                                            <label class="text-gray-600 small" for="emailExample">Email address</label>
+                                            <input asp-for="Input.Email" class="form-control form-control-solid" type="text" placeholder="Enter Email Address" aria-label="Email Address" aria-describedby="emailExample" />
+                                        </div>
+                                        <!-- Form Row-->
+                                        <div class="row gx-3">
+                                            <div class="col-md-6">
+                                                <!-- Form Group (choose password)-->
+                                                <div class="mb-3">
+                                                    <label class="text-gray-600 small" for="passwordExample">Password</label>
+                                                    <input asp-for="Input.Password" class="form-control form-control-solid" placeholder="Enter strong password" aria-label="Password" aria-describedby="passwordExample" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <!-- Form Group (confirm password)-->
+                                                <div class="mb-3">
+                                                    <label class="text-gray-600 small" for="confirmPasswordExample">Confirm Password</label>
+                                                    <input asp-for="Input.ConfirmPassword" class="form-control form-control-solid" placeholder="Repeat Password" aria-label="Confirm Password" aria-describedby="confirmPasswordExample" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Form Row-->
+                                        <div class="row gx-3">
+                                            <div class="col-md-6">
+                                                <!-- Form Group (profile)-->
+                                                <div class="mb-3 text-center">
+                                                    <img class="img-account-profile rounded-circle" id="CoverImagePrv" src="~/new/assets/img/demo/user-placeholder.svg" alt="Profile" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 my-5">
+                                                <!-- Form Group (upload image)-->
+                                                <div class="mb-3">
+                                                    <label class="text-gray-600 small">Upload Profile Picture</label>
+                                                    <input class="form-control text-center" onChange="document.getElementById('CoverImagePrv').src = window.URL.createObjectURL(this.files[0])" name="ImageUrl" type="file" accept="image/png, image/jpeg" required />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Form Group (form submission)-->
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="form-check">
+                                                <input class="form-check-input" id="checkTerms" type="checkbox" value="" />
+                                                <label class="form-check-label" for="checkTerms">
+                                                    I accept the
+                                                    <a href="#!">terms &amp; conditions</a>
+                                                    .
+                                                </label>
+                                            </div>
+                                            <button class="btn btn-primary" type="submit" href="auth-login-social.html">Create Account</button>
+                                        </div>
+
+                                    </form>
+                                </div>
+                                <hr class="my-0" />
+                                <div class="card-body px-5 py-4">
+                                    <div class="small text-center">
+                                        Have an account?
+                                        <a asp-area="Identity" asp-page="/Account/Login">Sign in!</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <partial name="_NewFooterV2" />
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

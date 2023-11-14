@@ -1,0 +1,27 @@
+﻿@model IEnumerable<AttendanceRecord>
+
+<!-- Create Attendance Record modal-->
+<div class="modal fade" id="createARModal" tabindex="-1" role="dialog" aria-labelledby="createGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createGroupModalLabel">Create New</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="AttendanceRecord" asp-action="Create" method="post">
+            <div class="modal-body"> 
+                <div class="mb-0">
+                    <label class="mb-1 small text-muted" for="formGroupName">Attendance Record</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter title..." required />
+                </div>  
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-danger-soft text-danger" data-bs-dismiss="modal">Cancel</a>
+                <button class="btn btn-primary-soft text-primary" type="submit">Create</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

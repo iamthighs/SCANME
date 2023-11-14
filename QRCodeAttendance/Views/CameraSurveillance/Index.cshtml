@@ -1,0 +1,322 @@
+﻿@{
+    ViewData["Title"] = "Camera Surveillance";
+    ViewData["ActivePage"] = ManageSidebar.CameraSurveillance;
+}
+<style>
+    .video-with-border {
+        border: 2px solid gray;
+        padding: 10px; /* Optional: Add padding to the border */
+        border-radius: 5px; /* Optional: Add rounded corners to the border */
+    }
+</style>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<partial name="_NewNavbar" />
+<div id="layoutSidenav">
+    <partial name="_NewSidenav" />
+    <div id="layoutSidenav_content">
+        <main>
+            <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+                <div class="container-xl px-4">
+                    <div class="page-header-content pt-4">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mt-4">
+                                <h1 class="page-header-title">
+                                    <div class="page-header-icon"><i data-feather="camera"></i></div>
+                                    Camera Surveillance
+                                </h1>
+                                <div class="page-header-subtitle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Main page content-->
+            <div class="container-xl px-4 mt-n10">
+                <div class="card">
+                    <div id="preload" class="d-flex justify-content-center align-items-center">
+                        <div class="text-center">
+                            <div class="sr-only spinner-border" role="status">
+                                <span class="sr-only"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-header border-bottom">
+                        <!-- Wizard navigation-->
+                        <div class="nav nav-pills nav-justified flex-column flex-xl-row nav-wizard" id="cardTab" role="tablist">
+                            <!-- Wizard navigation item 1-->
+                            <a class="nav-item nav-link active" id="wizardAll-tab" href="#wizardAll" data-bs-toggle="tab" role="tab" aria-controls="wizardAll" aria-selected="true">
+                                <div class="wizard-step-icon"><i data-feather="camera"></i></div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">All Cameras</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                            <!-- Wizard navigation item 1-->
+                            <a class="nav-item nav-link" id="wizard1-tab" href="#wizard1" data-bs-toggle="tab" role="tab" aria-controls="wizard1" aria-selected="true">
+                                <div class="wizard-step-icon">1</div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">Camera Stream</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                            <!-- Wizard navigation item 2-->
+                            <a class="nav-item nav-link" id="wizard2-tab" href="#wizard2" data-bs-toggle="tab" role="tab" aria-controls="wizard2" aria-selected="true">
+                                <div class="wizard-step-icon">2</div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">Camera Stream</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                            <!-- Wizard navigation item 3-->
+                            <a class="nav-item nav-link" id="wizard3-tab" href="#wizard3" data-bs-toggle="tab" role="tab" aria-controls="wizard3" aria-selected="true">
+                                <div class="wizard-step-icon">3</div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">Camera Stream</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                            <!-- Wizard navigation item 4-->
+                            <a class="nav-item nav-link" id="wizard4-tab" href="#wizard4" data-bs-toggle="tab" role="tab" aria-controls="wizard4" aria-selected="true">
+                                <div class="wizard-step-icon">4</div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">Camera Stream</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="cardTabContent">
+                            <!-- Wizard tab pane item All-->
+                            <div class="tab-pane fade show active" id="wizardAll" role="tabpanel" aria-labelledby="wizardAll-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">All Cameras</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="card-body row justify-content-center">
+                                                <video id="video1-all" class="col-sm-6 col-md-6 col-lg-6 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-1.jpg')"></video>
+                                                <video id="video2-all" class="col-sm-6 col-md-6 col-lg-6 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-2.jpg')"></video>
+                                                <video id="video3-all" class="col-sm-6 col-md-6 col-lg-6 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-3.jpg')"></video>
+                                                <video id="video4-all" class="col-sm-6 col-md-6 col-lg-6 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-4.jpg')"></video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wizard tab pane item 1-->
+                            <div class="tab-pane fade" id="wizard1" role="tabpanel" aria-labelledby="wizard1-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">Camera Stream #1</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="mb-3">
+                                                <div id="sourceSelectPanel1">
+                                                    <label for="sourceSelect1">Video Source:</label>
+                                                    <select class="form-control" id="sourceSelect1" style="max-width:400px"></select>
+                                                </div>
+                                                <div id="resolutionSelectPanel1">
+                                                    <label for="resolutionSelect1">Video Resolution:</label>
+                                                    <select class="form-control resolution-select" id="resolutionSelect1" style="max-width:400px">
+                                                        <option value="1080">Full High Definition (1080p)</option>
+                                                        <option value="720">High Definition (720p)</option>
+                                                        <option value="480">Standard Definition (480p)</option>
+                                                        <option value="360">Standard Definition (360p)</option>
+                                                        <option value="240">Low Definition (240p)</option>
+                                                        <option value="180">Low Definition (180p)</option>
+                                                        <option value="144">Low Definition (144p)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <a class="btn btn-sm btn-light text-primary" id="startButton1">
+                                                    <i class="me-1" data-feather="play-circle"></i>
+                                                    Start
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-danger" id="stopButton1">
+                                                    <i class="me-1" data-feather="stop-circle"></i>
+                                                    Stop
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="captureButton1">
+                                                    <i class="me-1" data-feather="camera"></i>
+                                                    Capture
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="recordButton1">
+                                                    <i class="me-1" data-feather="circle"></i>
+                                                    Record
+                                                </a>
+                                            </div>
+                                            <div class="card-body">
+                                                <video id="video1" class="col-sm-12 col-md-12 col-lg-12 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-1.jpg')"></video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wizard tab pane item 2-->
+                            <div class="tab-pane fade" id="wizard2" role="tabpanel" aria-labelledby="wizard2-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">Camera Stream #2</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="mb-3">
+                                                <div id="sourceSelectPanel2">
+                                                    <label for="sourceSelect2">Video Source:</label>
+                                                    <select class="form-control" id="sourceSelect2" style="max-width:400px"></select>
+                                                </div>
+                                                <div id="resolutionSelectPanel2">
+                                                    <label for="resolutionSelect2">Video Resolution:</label>
+                                                    <select class="form-control resolution-select" id="resolutionSelect2" style="max-width:400px">
+                                                        <option value="1080">Full High Definition (1080p)</option>
+                                                        <option value="720">High Definition (720p)</option>
+                                                        <option value="480">Standard Definition (480p)</option>
+                                                        <option value="360">Standard Definition (360p)</option>
+                                                        <option value="240">Low Definition (240p)</option>
+                                                        <option value="180">Low Definition (180p)</option>
+                                                        <option value="144">Low Definition (144p)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <a class="btn btn-sm btn-light text-primary" id="startButton2">
+                                                    <i class="me-1" data-feather="play-circle"></i>
+                                                    Start
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-danger" id="stopButton2">
+                                                    <i class="me-1" data-feather="stop-circle"></i>
+                                                    Stop
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="captureButton2">
+                                                    <i class="me-1" data-feather="camera"></i>
+                                                    Capture
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="recordButton2">
+                                                    <i class="me-1" data-feather="circle"></i>
+                                                    Record
+                                                </a>
+                                            </div>
+                                            <div class="card-body">
+                                                <video id="video2" class="col-sm-12 col-md-12 col-lg-12 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-2.jpg')"></video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wizard tab pane item 3-->
+                            <div class="tab-pane fade" id="wizard3" role="tabpanel" aria-labelledby="wizard3-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">Camera Stream #3</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="mb-3">
+                                                <div id="sourceSelectPanel3">
+                                                    <label for="sourceSelect3">Video Source:</label>
+                                                    <select class="form-control" id="sourceSelect3" style="max-width:400px"></select>
+                                                </div>
+                                                <div id="resolutionSelectPanel3">
+                                                    <label for="resolutionSelect3">Video Resolution:</label>
+                                                    <select class="form-control resolution-select" id="resolutionSelect3" style="max-width:400px">
+                                                        <option value="1080">Full High Definition (1080p)</option>
+                                                        <option value="720">High Definition (720p)</option>
+                                                        <option value="480">Standard Definition (480p)</option>
+                                                        <option value="360">Standard Definition (360p)</option>
+                                                        <option value="240">Low Definition (240p)</option>
+                                                        <option value="180">Low Definition (180p)</option>
+                                                        <option value="144">Low Definition (144p)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <a class="btn btn-sm btn-light text-primary" id="startButton3">
+                                                    <i class="me-1" data-feather="play-circle"></i>
+                                                    Start
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-danger" id="stopButton3">
+                                                    <i class="me-1" data-feather="stop-circle"></i>
+                                                    Stop
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="captureButton3">
+                                                    <i class="me-1" data-feather="camera"></i>
+                                                    Capture
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="recordButton3">
+                                                    <i class="me-1" data-feather="circle"></i>
+                                                    Record
+                                                </a>
+                                            </div>
+                                            <div class="row">
+                                                <video id="video3" class="col-sm-12 col-md-12 col-lg-12 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-3.jpg')"></video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wizard tab pane item 4-->
+                            <div class="tab-pane fade" id="wizard4" role="tabpanel" aria-labelledby="wizard4-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">Camera Stream #4</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="mb-3">
+                                                <div id="sourceSelectPanel4">
+                                                    <label for="sourceSelect4">Video Source:</label>
+                                                    <select class="form-control" id="sourceSelect4" style="max-width:400px"></select>
+                                                </div>
+                                                <div id="resolutionSelectPanel14">
+                                                    <label for="resolutionSelect4">Video Resolution:</label>
+                                                    <select class="form-control resolution-select" id="resolutionSelect4" style="max-width:400px">
+                                                        <option value="1080">Full High Definition (1080p)</option>
+                                                        <option value="720">High Definition (720p)</option>
+                                                        <option value="480">Standard Definition (480p)</option>
+                                                        <option value="360">Standard Definition (360p)</option>
+                                                        <option value="240">Low Definition (240p)</option>
+                                                        <option value="180">Low Definition (180p)</option>
+                                                        <option value="144">Low Definition (144p)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <a class="btn btn-sm btn-light text-primary" id="startButton4">
+                                                    <i class="me-1" data-feather="play-circle"></i>
+                                                    Start
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-danger" id="stopButton4">
+                                                    <i class="me-1" data-feather="stop-circle"></i>
+                                                    Stop
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="captureButton4">
+                                                    <i class="me-1" data-feather="camera"></i>
+                                                    Capture
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-primary" id="recordButton4">
+                                                    <i class="me-1" data-feather="circle"></i>
+                                                    Record
+                                                </a>
+                                            </div>
+                                            <div class="row">
+                                                <video id="video4" class="col-sm-12 col-md-12 col-lg-12 video-with-border bg-img-cover" style="background-image: url('new/assets/img/no-camera-4.jpg')"></video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        <partial name="_NewFooter" />
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script type="text/javascript" src="~/js/index.min.js" asp-append-version="true"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="~/new/js/camera-surveillance.js"></script>
+

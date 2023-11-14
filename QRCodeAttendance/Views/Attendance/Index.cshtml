@@ -1,0 +1,335 @@
+﻿@{
+    ViewData["Title"] = "QR Code Scanner";
+}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<div class="row mt-3">
+    <div class="card col-lg-6 p-0 m-0" id="demo-content">
+        <h1 class="title text-primary card-header p-0 text-center">@ViewData["Title"]</h1>
+
+
+
+        <div class="mt-3 text-center">
+            <a class="btn btn-primary" id="startButton">Start</a>
+            <a class="btn btn-danger" id="resetButton">Stop</a>
+        </div>
+
+        <div class="text-center mt-3">
+            <video id="video" class="col-7" height="250" style="border: 1px solid blue"></video>
+        </div>
+
+        <div class="m-3">
+            <div id="sourceSelectPanel" style="display:none">
+                <label for="sourceSelect">Change video source:</label>
+                <select class="form-control" id="sourceSelect" style="max-width:400px">
+                </select>
+            </div>
+
+            <div style="display: table" class="mb-3">
+                <label for="decoding-style"> Decoding Style:</label>
+                <select class="form-control" id="decoding-style" size="1">
+                    <option value="once">Decode once</option>
+                    <option value="continuously">Decode continuously</option>
+                </select>
+            </div>
+        </div>
+        
+
+        
+
+
+    </div>
+    <div class="card col-lg-6 m-0 p-0" id="demo-content">
+        
+        <h1 class="title text-primary card-header p-0 text-center">Student Details</h1>
+        
+        <div class="card-body text-center mt-3">
+            <img id="studentPicture" class="col-4" height="200" style="border: 1px solid blue" src="~/profile/no-image.jpg" alt="Student Picture">
+            <hr />
+            <ul class="list-group list-group-flush" id="studentName">
+            </ul>
+        </div>
+        <div class="card-footer text-center bg-light">
+            <h1 class="title text-primary">Result</h1>
+            <pre><code id="result"></code></pre>
+        </div>
+    </div>
+
+    
+    <div class="card col-12 text-center mt-3 p-0" id="demo-content">
+        <h1 class="title text-primary card-header p-0">Visitors List</h1>
+        <ul class="list-group list-group-flush" id="attendanceList"></ul>
+    </div>
+</div>
+
+
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script type="text/javascript" src="~/js/index.min.js" asp-append-version="true"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+    
+    // Define an object to store attendance records
+    const attendanceRecords = {};
+    const previousStatus = {};
+    
+    window.addEventListener('load', function () {
+        let selectedDeviceId;
+        const codeReader = new ZXing.BrowserQRCodeReader()
+        console.log('ZXing code reader initialized')
+
+        codeReader.getVideoInputDevices()
+            .then((videoInputDevices) => {
+                const sourceSelect = document.getElementById('sourceSelect')
+                selectedDeviceId = videoInputDevices[0].deviceId
+                if (videoInputDevices.length >= 1) {
+                    videoInputDevices.forEach((element) => {
+                        const sourceOption = document.createElement('option')
+                        sourceOption.text = element.label
+                        sourceOption.value = element.deviceId
+                        sourceSelect.appendChild(sourceOption)
+                    })
+
+                    sourceSelect.onchange = () => {
+                        selectedDeviceId = sourceSelect.value;
+                    };
+
+                    const sourceSelectPanel = document.getElementById('sourceSelectPanel')
+                    sourceSelectPanel.style.display = 'block'
+                }
+
+                document.getElementById('startButton').addEventListener('click', () => {
+
+                    const decodingStyle = document.getElementById('decoding-style').value;
+
+                    if (decodingStyle == "once") {
+                        decodeOnce(codeReader, selectedDeviceId);
+                    } else {
+                        decodeContinuously(codeReader, selectedDeviceId);
+                    }
+
+                    console.log(`Started decode from camera with id ${selectedDeviceId}`)
+                })
+
+                document.getElementById('resetButton').addEventListener('click', () => {
+                    codeReader.reset()
+                    document.getElementById('result').textContent = '';
+                    console.log('Reset.')
+                })
+
+            })
+            .catch((err) => {
+                console.error(err)
+            })
+    })
+
+    async function getStudentInfoFromServer(code) {
+        try {
+            const response = await fetch(`/api/Attendance/GetStudentInfo?qrCodeData=${encodeURIComponent(code)}`);
+            if (!response.ok) {
+                throw new Error('QR code data not found in the database.');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching student information:', error);
+            return null;
+        }
+    }
+
+
+
+    async function checkQRCodeInDatabase(code) {
+        try {
+            const studentInfo = await fetch(`/api/Attendance/CheckQRCode?qrCodeData=${encodeURIComponent(code)}`);
+            
+            return studentInfo.ok;
+        } catch (error) {
+            console.error('Error checking QR code in the database:', error);
+            throw error; // Rethrow the error to be caught in the calling function
+        }
+    }
+    
+    async function recordAttendance(code, status) {
+        const currentTime = new Date().toLocaleString();
+
+        // Check if the QR code exists in the database
+        try {
+            const codeExists = await checkQRCodeInDatabase(code);
+            if (!codeExists) {
+                toastr.error('QR code not found in the database.')
+                console.error('QR code not found in the database.');
+                return;
+            }
+            
+        } catch (error) {
+            toastr.error('Error checking QR code in the database.')
+            console.error('Error checking QR code in the database:', error);
+            return;
+        }
+
+        // Fetch the student information using the QR code data
+        const studentInfo = await getStudentInfoFromServer(code);
+        console.log('Received studentInfo:', studentInfo);
+        if (studentInfo) {
+            displayStudentInfo(studentInfo);
+        } else {
+            // Handle the case when student information is not available
+            toastr.error('Student information not available.');
+        }
+
+        if (!attendanceRecords[code]) {
+            // If the code is not in the records, create a new entry
+            attendanceRecords[code] = { inTime: null, outTime: null };
+            previousStatus[code] = null;
+        }
+        if (status === 'In') {
+            // Update the in time if the status is 'In'
+            attendanceRecords[code].inTime = currentTime;
+            previousStatus[code] = 'In';
+            updateAttendanceList();
+            toastr.success('Time In')
+        } else if (status === 'Out') {
+            // Update the out time if the status is 'Out'
+            attendanceRecords[code].outTime = currentTime;
+            previousStatus[code] = 'Out';
+            updateAttendanceList();
+            toastr.success('Time Out')
+        }
+
+        // Create the data object
+        const data = {
+            code: code,
+            status: status
+        };
+
+        fetch('/api/Attendance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Attendance data recorded successfully.');
+                    updateAttendanceList(); // Make sure this function is correctly implemented
+                } else {
+                    return response.json().then(data => {
+                        console.error('Error sending attendance data:', data.error || response.statusText);
+                    }).catch(error => {
+                        console.error('Error parsing response:', error);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Fetch API error:', error);
+            });
+
+    }
+
+    function displayStudentInfo(studentInfo) {
+        // Update the DOM to display the student information
+        console.log('Displaying studentInfo:', studentInfo);
+
+        // Update the DOM to display the student information
+        const studentDetailsList = document.getElementById('studentName');
+        const studentPicture = document.getElementById('studentPicture');
+        // Clear the previous student information if any
+        studentDetailsList.innerHTML = '';
+        // Create list items for each student property
+        for (const property in studentInfo) {
+            if (property === 'imageUrl') {
+                // Set the image source to the student's picture URL
+                studentPicture.src = '/profile/' + studentInfo[property];
+            } else {
+                const li = document.createElement('li');
+                li.textContent = `${studentInfo[property]}`;
+                li.classList.add('list-group-item');
+                studentDetailsList.appendChild(li);
+            }
+        }
+        
+    }
+
+    function updateAttendanceList() {
+        const attendanceList = document.getElementById('attendanceList');
+        attendanceList.innerHTML = '';
+
+        for (const code in attendanceRecords) {
+            const record = attendanceRecords[code];
+            const li = document.createElement('li');
+            li.textContent = `${code} - In: ${record.inTime} - Out: ${record.outTime || "Not yet scanned out"}`;
+            li.classList.add('list-group-item');
+            attendanceList.appendChild(li);
+        }
+    }
+
+    const audio = new Audio();
+    audio.onerror = (event) => {
+        console.error('Error loading audio:', event.target.error);
+    };
+
+    // Set the sources for the audio element (replace with your actual file paths)
+    audio.src = '/beep.mp3';
+    function decodeOnce(codeReader, selectedDeviceId) {
+        codeReader.decodeFromInputVideoDevice(selectedDeviceId, 'video').then((result) => {
+            console.log(result)
+            document.getElementById('result').textContent = result.text;
+            // Determine the status (In or Out) based on the previous status
+            const previous = previousStatus[result.text];
+            const status = previous === 'In' ? 'Out' : 'In';
+            // Play the sound effect
+            audio.play();
+
+            
+            // Record the time in when the QR code is scanned
+            recordAttendance(result.text, status);
+            
+        }).catch((err) => {
+            console.error(err)
+            document.getElementById('result').textContent = err;
+        })
+    }
+
+    // Flag to indicate if the function is currently processing a QR code
+    let isProcessing = false;
+
+    function decodeContinuously(codeReader, selectedDeviceId) {
+        codeReader.decodeFromInputVideoDeviceContinuously(selectedDeviceId, 'video', (result, err) => {
+            if (!isProcessing && result) {
+                // Set the flag to true, indicating that a QR code is being processed
+                isProcessing = true;
+
+                // properly decoded qr code
+                console.log('Found QR code!', result)
+                document.getElementById('result').textContent = result.text;
+                // Determine the status (In or Out) based on the previous status
+                const previous = previousStatus[result.text];
+                const status = previous === 'In' ? 'Out' : 'In';
+                // Record the time in when the QR code is scanned
+                recordAttendance(result.text, status);
+                
+                // Play the sound effect
+                audio.play();
+
+                
+                // Add a delay of, for example, 2 seconds before processing the next QR code
+                setTimeout(() => {
+                    // Reset the flag to false after the delay, allowing the function to process the next QR code
+                    isProcessing = false;
+                }, 2000);
+            }
+
+            if (err) {
+                // As long as this error belongs into one of the following categories
+                // the code reader is going to continue as expected. Any other error
+                // will stop the decoding loop.
+                // ... (the rest of your error handling code)
+            }
+        });
+    }
+
+    
+</script>
+

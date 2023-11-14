@@ -1,0 +1,550 @@
+﻿@model AttendanceRecord
+
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["ActivePage"] = ManageSidebar.Attendance;
+}
+<style>
+    .video-with-border {
+        border: 2px solid gray;
+        padding: 10px; /* Optional: Add padding to the border */
+        border-radius: 5px; /* Optional: Add rounded corners to the border */
+    }
+</style>
+<partial name="_NewNavbar" />
+<div id="layoutSidenav">
+    <partial name="_NewSidenav" />
+    <div id="layoutSidenav_content">
+        <main>
+            <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+                <partial name="_Notification" />
+                <div class="container-fluid px-4">
+                    <div class="page-header-content">
+                        <div class="row align-items-center justify-content-between pt-3">
+                            <div class="col-auto mb-3">
+                                <h1 class="page-header-title">
+                                    <div class="page-header-icon"><i data-feather="database"></i></div>
+                                    @Model.Title | @Model.DateCreated.ToLongDateString()
+                                </h1>
+                            </div>
+                            <div class="col-12 col-xl-auto mb-3">
+                                <a class="btn btn-sm btn-light text-primary" asp-area="" asp-controller="AttendanceRecord" asp-action="Index">
+                                    <i class="me-1" data-feather="arrow-left"></i>
+                                    Back to List
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Main page content-->
+            <div class="container-xl px-4 mt-4">
+                <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+                <div class="card">
+                    <div id="preload" class="d-flex justify-content-center align-items-center">
+                        <div class="text-center">
+                            <div class="sr-only spinner-border" role="status">
+                                <span class="sr-only"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-header border-bottom">
+                        <!-- Wizard navigation-->
+                        <div class="nav nav-pills nav-justified flex-column flex-xl-row nav-wizard" id="cardTab" role="tablist">
+                            <!-- Wizard navigation item 1-->
+                            <a class="nav-item nav-link active" id="wizard1-tab" href="#wizard1" data-bs-toggle="tab" role="tab" aria-controls="wizard1" aria-selected="true">
+                                <div class="wizard-step-icon"><i data-feather="maximize"></i></div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">QR Code Scanner</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                            <!-- Wizard navigation item 2-->
+                            <a class="nav-item nav-link" id="wizard2-tab" href="#wizard2" data-bs-toggle="tab" role="tab" aria-controls="wizard2" aria-selected="true">
+                                <div class="wizard-step-icon"><i data-feather="user"></i></div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">Student Details</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                            <!-- Wizard navigation item 3-->
+                            <a class="nav-item nav-link" id="wizard3-tab" href="#wizard3" data-bs-toggle="tab" role="tab" aria-controls="wizard3" aria-selected="true">
+                                <div class="wizard-step-icon"><i data-feather="list"></i></div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">Time In/Out List</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                            <!-- Wizard navigation item 4-->
+                            <a class="nav-item nav-link" id="wizard4-tab" href="#wizard4" data-bs-toggle="tab" role="tab" aria-controls="wizard4" aria-selected="true">
+                                <div class="wizard-step-icon"><i data-feather="settings"></i></div>
+                                <div class="wizard-step-text">
+                                    <div class="wizard-step-text-name">Settings</div>
+                                    <div class="wizard-step-text-details"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="cardTabContent">
+                            <!-- Wizard tab pane item 1-->
+                            <div class="tab-pane fade show active" id="wizard1" role="tabpanel" aria-labelledby="wizard1-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">QR Code Scanner</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="mb-3">
+                                                <a class="btn btn-sm btn-light text-primary" id="startButton">
+                                                    <i class="me-1" data-feather="play-circle"></i>
+                                                    Start
+                                                </a>
+                                                <a class="btn btn-sm btn-light text-danger" id="resetButton">
+                                                    <i class="me-1" data-feather="stop-circle"></i>
+                                                    Stop
+                                                </a>
+                                            </div>
+                                            <div class="card-body">
+                                                <video id="video" class="col-sm-12 col-md-12 col-lg-12 video-with-border"></video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wizard tab pane item 2-->
+                            <div class="tab-pane fade" id="wizard2" role="tabpanel" aria-labelledby="wizard2-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary" id="datetime"></h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="row justify-content-center">
+                                                <div class="card shadow-none rounded-xl border-dark m-3" style="width:6.75in;height:4.25in">
+                                                    <div class="card-body row justify-content-center">
+                                                        <div class="col-xxl-12 col-xl-12">
+                                                            <div class="row justify-content-center">
+                                                                <div class="row justify-content-center mb-3">
+                                                                    <div class="col-2 m-0 p-0">
+                                                                        <img class="img-account-profile rounded-circle" src="~/new/assets/img/tup-logo.png" style="width:1in;height:1in" alt="" />
+                                                                    </div>
+                                                                    <div class="col-8 text-center m-0 p-0">
+                                                                        <h6 class="m-0 small text-muted">Republic of the Phlippines</h6>
+                                                                        <h6 class="m-0 small text-muted">TECHNOLOGICAL UNIVERSITY OF THE PHILIPPINES</h6>
+                                                                        <h6 class="m-0 small text-muted">Ayala Boulevard Ermita, Manila, 1000</h6>
+                                                                        <h6 class="m-0 small text-muted">www.tup.edu.ph</h6>
+                                                                    </div>
+                                                                    <div class="col-2 m-0 p-0">
+                                                                        <img class="img-account-profile" src="~/new/assets/img/SCANME5.png" alt="" style="width:1in;height:1in" />
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4 text-center">
+                                                                    <img id="studentPicture" class="img-account-profile rounded-circle mb-2" src="~/profile/male-icon.jpg" alt="" />
+                                                                    <code id="result">TUPM-**-*****</code>
+                                                                </div>
+                                                                <div class="col-8 card-body">
+                                                                    <!-- Form Row-->
+                                                                    <div class="row justify-content-center mb-1">
+                                                                        <!-- Form Group (first name)-->
+                                                                        <div class="col-md-4">
+                                                                            <div class="small mb-0" for="inputFirstName">First name</div>
+                                                                            <div class="fw-bolder text-dark" id="firstName">*****</div>
+                                                                        </div>
+                                                                        <!-- Form Group (middle name)-->
+                                                                        <div class="col-md-4">
+                                                                            <div class="small mb-0">Middle name</div>
+                                                                            <div class="fw-bolder text-dark" id="middleName">*****</div>
+                                                                        </div>
+                                                                        <!-- Form Group (last name)-->
+                                                                        <div class="col-md-4">
+                                                                            <div class="small mb-0" for="inputLastName">Last name</div>
+                                                                            <div class="fw-bolder text-dark" id="lastName">*****</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row mb-1">
+                                                                        <div class="col-md-6">
+                                                                            <div class="small mb-0">Sex</div>
+                                                                            <div class="fw-bolder text-dark" id="sex">*****</div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="small mb-0" for="inputLastName">Birthdate</div>
+                                                                            <div class="fw-bolder text-dark" id="birthDate">*****</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row mb-1">
+                                                                        <div class="col-md-6">
+                                                                            <div class="small mb-0">Department</div>
+                                                                            <div class="fw-bolder text-dark" id="department">*****</div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="small mb-0">Course</div>
+                                                                            <div class="fw-bolder text-dark" id="course">*****</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wizard tab pane item 3-->
+                            <div class="tab-pane fade" id="wizard3" role="tabpanel" aria-labelledby="wizard3-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">Time In/Out List</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="card-body card-scrollable">
+                                                <ul class="list-group list-group-flush" id="attendanceList">
+                                                    @foreach (var attendance in Model.Attendees)
+                                                    {
+                                                        <li class="list-group-item m-0 p-0">
+                                                            <code>@attendance.Code</code> | 
+                                                            @if (attendance.Status == "In")
+                                                            {
+                                                                <span class="badge bg-green-soft text-green">@attendance.Status</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-red-soft text-red">@attendance.Status</span>
+                                                            }
+                                                            | @attendance.Time.ToShortTimeString()
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wizard tab pane item 4-->
+                            <div class="tab-pane fade" id="wizard4" role="tabpanel" aria-labelledby="wizard4-tab">
+                                <div class="card shadow-none rounded-xl m-3">
+                                    <div class="card-body row justify-content-center">
+                                        <div class="col-xxl-12 col-xl-12">
+                                            <h3 class="text-primary">Settings</h3>
+                                            <h5 class="card-title mb-4"></h5>
+                                            <div class="m-3">
+                                                <div id="sourceSelectPanel" style="display:none">
+                                                    <label for="sourceSelect">Change video source:</label>
+                                                    <select class="form-control" id="sourceSelect" style="max-width:400px">
+                                                    </select>
+                                                </div>
+
+                                                <div style="display: table" class="mb-3">
+                                                    <label for="decoding-style"> Decoding Style:</label>
+                                                    <select class="form-control" id="decoding-style" size="1">
+                                                        <option value="once">Decode once</option>
+                                                        <option value="continuously">Decode continuously</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <partial name="_NewFooter" />
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script type="text/javascript" src="~/js/index.min.js" asp-append-version="true"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    function updateDateTime() {
+        const datetimeElement = document.getElementById('datetime');
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const formattedDate = now.toLocaleDateString(undefined, options);
+
+        datetimeElement.textContent = formattedDate;
+    }
+
+    // Update the date and time immediately when the page loads
+    updateDateTime();
+
+    // Set up an interval to update the date and time every second
+    setInterval(updateDateTime, 1000);
+</script>
+<script type="text/javascript">
+
+    toastr.options = {
+        "positionClass": "toast-bottom-full-width fw-bolder text-center"
+    }
+    // Define an object to store attendance records
+    const attendanceRecords = {};
+    const previousStatus = {};
+
+    window.addEventListener('load', function () {
+        let selectedDeviceId;
+        const codeReader = new ZXing.BrowserQRCodeReader()
+        console.log('ZXing code reader initialized')
+
+        codeReader.getVideoInputDevices()
+            .then((videoInputDevices) => {
+                const sourceSelect = document.getElementById('sourceSelect')
+                selectedDeviceId = videoInputDevices[0].deviceId
+                if (videoInputDevices.length >= 1) {
+                    videoInputDevices.forEach((element) => {
+                        const sourceOption = document.createElement('option')
+                        sourceOption.text = element.label
+                        sourceOption.value = element.deviceId
+                        sourceSelect.appendChild(sourceOption)
+                    })
+
+                    sourceSelect.onchange = () => {
+                        selectedDeviceId = sourceSelect.value;
+                    };
+
+                    const sourceSelectPanel = document.getElementById('sourceSelectPanel')
+                    sourceSelectPanel.style.display = 'block'
+                }
+
+                document.getElementById('startButton').addEventListener('click', () => {
+
+                    const decodingStyle = document.getElementById('decoding-style').value;
+
+                    if (decodingStyle == "once") {
+                        decodeOnce(codeReader, selectedDeviceId);
+                    } else {
+                        decodeContinuously(codeReader, selectedDeviceId);
+                    }
+
+                    console.log(`Started decode from camera with id ${selectedDeviceId}`)
+                })
+
+                document.getElementById('resetButton').addEventListener('click', () => {
+                    codeReader.reset()
+                    document.getElementById('result').textContent = '';
+                    console.log('Reset.')
+                })
+
+            })
+            .catch((err) => {
+                console.error(err)
+            })
+    })
+
+    async function getStudentInfoFromServer(code) {
+        try {
+            const response = await fetch(`api/Attendance/GetStudentInfo?qrCodeData=${encodeURIComponent(code)}`);
+            if (!response.ok) {
+                throw new Error('QR code data not found in the database.');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching student information:', error);
+            return null;
+        }
+    }
+
+
+
+    async function checkQRCodeInDatabase(code) {
+        try {
+            const studentInfo = await fetch(`api/Attendance/CheckQRCode?qrCodeData=${encodeURIComponent(code)}`);
+
+            return studentInfo.ok;
+        } catch (error) {
+            console.error('Error checking QR code in the database:', error);
+            throw error; // Rethrow the error to be caught in the calling function
+        }
+    }
+
+    async function recordAttendance(code, status) {
+        const currentTime = new Date().toLocaleString();
+
+        // Check if the QR code exists in the database
+        try {
+            const codeExists = await checkQRCodeInDatabase(code);
+            if (!codeExists) {
+                toastr.error('QR code not found in the database.')
+                console.error('QR code not found in the database.');
+                return;
+            }
+
+        } catch (error) {
+            toastr.error('Error checking QR code in the database.')
+            console.error('Error checking QR code in the database:', error);
+            return;
+        }
+
+        // Fetch the student information using the QR code data
+        const studentInfo = await getStudentInfoFromServer(code);
+        console.log('Received studentInfo:', studentInfo);
+        if (studentInfo) {
+            displayStudentInfo(studentInfo);
+        } else {
+            // Handle the case when student information is not available
+            toastr.error('Student information not available.');
+        }
+
+        if (!attendanceRecords[code]) {
+            // If the code is not in the records, create a new entry
+            attendanceRecords[code] = { inTime: null, outTime: null };
+            previousStatus[code] = null;
+        }
+        if (status === 'In') {
+            // Update the in time if the status is 'In'
+            attendanceRecords[code].inTime = currentTime;
+            previousStatus[code] = 'In';
+            updateAttendanceList();
+            toastr.success('TIME IN')
+        } else if (status === 'Out') {
+            // Update the out time if the status is 'Out'
+            attendanceRecords[code].outTime = currentTime;
+            previousStatus[code] = 'Out';
+            updateAttendanceList();
+            toastr.success('TIME OUT')
+        }
+
+        // Create the data object
+        const data = {
+            code: code,
+            status: status
+        };
+
+        fetch('/AddStudentToRecord?recordId=' + @Model.Id, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Attendance data recorded successfully.');
+                    updateAttendanceList(); // Make sure this function is correctly implemented
+                } else {
+                    return response.json().then(data => {
+                        console.error('Error sending attendance data:', data.error || response.statusText);
+                    }).catch(error => {
+                        console.error('Error parsing response:', error);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Fetch API error:', error);
+            });
+
+    }
+
+    function displayStudentInfo(studentInfo) {
+        // Update the DOM to display the student information
+        console.log('Displaying studentInfo:', studentInfo);
+
+        // Update the DOM to display the student information
+        const studentPicture = document.getElementById('studentPicture');
+        const studentProperties = ['firstName', 'middleName', 'lastName', 'sex', 'birthDate', 'department', 'course', 'imageUrl'];
+
+        // Clear the previous student information if any
+        studentProperties.forEach(property => {
+            const element = document.getElementById(property);
+            if (element) {
+                element.innerHTML = '';
+            }
+        });
+
+        // Create list items for each student property
+        for (const property of studentProperties) {
+            if (property === 'imageUrl') {
+                // Set the image source to the student's picture URL
+                studentPicture.src = '/profile/' + studentInfo[property];
+            } else {
+                const element = document.getElementById(property);
+                if (element) {
+                    element.innerHTML = studentInfo[property];
+                }
+            }
+        }
+
+    }
+
+    function updateAttendanceList() {
+        const attendanceList = document.getElementById('attendanceList');
+        attendanceList.innerHTML = '';
+
+        for (const code in attendanceRecords) {
+            const record = attendanceRecords[code];
+            const li = document.createElement('li');
+            li.innerHTML = `<code>${code}</code> | <span class="badge bg-green-soft text-green">In</span> : ${record.inTime} | <span class="badge bg-red-soft text-red">Out</span> : ${record.outTime || "Not yet scanned out"}`;
+            li.classList.add('list-group-item');
+            attendanceList.appendChild(li);
+        }
+    }
+
+    const audio = new Audio();
+    audio.onerror = (event) => {
+        console.error('Error loading audio:', event.target.error);
+    };
+
+    // Set the sources for the audio element (replace with your actual file paths)
+    audio.src = '/beep.mp3';
+    function decodeOnce(codeReader, selectedDeviceId) {
+        codeReader.decodeFromInputVideoDevice(selectedDeviceId, 'video').then((result) => {
+            console.log(result)
+            document.getElementById('result').textContent = result.text;
+            // Determine the status (In or Out) based on the previous status
+            const previous = previousStatus[result.text];
+            const status = previous === 'In' ? 'Out' : 'In';
+            // Play the sound effect
+            audio.play();
+
+
+            // Record the time in when the QR code is scanned
+            recordAttendance(result.text, status);
+
+        }).catch((err) => {
+            console.error(err)
+            document.getElementById('result').textContent = err;
+        })
+    }
+
+    // Flag to indicate if the function is currently processing a QR code
+    let isProcessing = false;
+
+    function decodeContinuously(codeReader, selectedDeviceId) {
+        codeReader.decodeFromInputVideoDeviceContinuously(selectedDeviceId, 'video', (result, err) => {
+            if (!isProcessing && result) {
+                // Set the flag to true, indicating that a QR code is being processed
+                isProcessing = true;
+
+                // properly decoded qr code
+                console.log('Found QR code!', result)
+                document.getElementById('result').textContent = result.text;
+                // Determine the status (In or Out) based on the previous status
+                const previous = previousStatus[result.text];
+                const status = previous === 'In' ? 'Out' : 'In';
+                // Record the time in when the QR code is scanned
+                recordAttendance(result.text, status);
+
+                // Play the sound effect
+                audio.play();
+
+
+                // Add a delay of, for example, 2 seconds before processing the next QR code
+                setTimeout(() => {
+                    // Reset the flag to false after the delay, allowing the function to process the next QR code
+                    isProcessing = false;
+                }, 2000);
+            }
+
+            if (err) {
+                // As long as this error belongs into one of the following categories
+                // the code reader is going to continue as expected. Any other error
+                // will stop the decoding loop.
+                // ... (the rest of your error handling code)
+            }
+        });
+    }
+</script>

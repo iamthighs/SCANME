@@ -1,0 +1,123 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+<style>
+    .valid {
+        color: green;
+    }
+
+    .invalid {
+        color: red;
+    }
+</style>
+<form id="profile-form" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-xl-4">
+            <!-- Profile picture card-->
+            <div class="card mb-4 mb-xl-0">
+                <div class="card-header">Profile Picture</div>
+                <div class="card-body text-center">
+                    <!-- Profile picture image-->
+                    <img class="img-account-profile rounded-circle mb-2" id="CoverImagePrv" src="~/UserImages/@(User.FindFirst("UserProfile").Value)" alt="" />
+                    <!-- Profile picture help block-->
+                    <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
+                    <!-- Form Group (profile picture)-->
+                    <div class="col-md-12 mb-3">
+                        <label class="small mb-1">Upload New Profile Picture</label>
+                        <div class="custom-file">
+                            <input asp-for="CoverImage" class="form-control" id="FLCoverImage" accept="image/png, image/jpeg"
+                                    onChange="document.getElementById('CoverImagePrv').src = window.URL.createObjectURL(this.files[0])">
+                            <label class="custom-file-label" for="FLCoverImage"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-8">
+            <!-- Account details card-->
+            <div class="card mb-4">
+                <div class="card-header">Account Details</div>
+                <partial name="_StatusMessage" for="StatusMessage" />
+                                    
+                <div class="card-body">
+                        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+                                            
+                        <!-- Form Group (username)-->
+                        <div class="mb-3">
+                            <label class="small mb-1" for="inputUsername">Username</label>
+                            <input asp-for="Username" disabled class="form-control" />
+                        </div>
+                        <!-- Form Row-->
+                        <div class="row gx-3 mb-3">
+                            <!-- Form Group (first name)-->
+                            <div class="col-md-6">
+                                <label class="small mb-1" for="inputFirstName">First name</label>
+                                <input class="form-control" asp-for="Input.NewFirstName" value="@(User.FindFirst("UserFirstName").Value)" />
+                            </div>
+                            <!-- Form Group (last name)-->
+                            <div class="col-md-6">
+                                <label class="small mb-1" for="inputLastName">Last name</label>
+                                <input class="form-control" asp-for="Input.NewLastName" value="@(User.FindFirst("UserLastName").Value)" />
+                            </div>
+                        </div>
+                                            
+                                            
+                        <!-- Form Row-->
+                        <div class="row gx-3 mb-3">
+                            <!-- Form Group (phone number)-->
+                            <div class="col-md-6">
+                                <label class="small mb-1" for="inputPhone">Phone number</label>
+                                <input class="form-control" asp-for="Input.PhoneNumber" placeholder="Enter valid phone number" maxlength="11" id="phoneNumberInput" />
+                                <p id="validationMessage"></p>
+                            </div>
+                            <div class="col-md-6">
+                                                    
+                            </div>
+                                                
+                        </div>
+                        <!-- Save changes button-->
+                        <button class="btn btn-primary" type="submit">Save changes</button>
+                                        
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Get references to the HTML elements
+        var phoneNumberInput = document.getElementById("phoneNumberInput");
+        var validationMessage = document.getElementById("validationMessage");
+
+        // Function to validate the Philippine phone number
+        function validatePhoneNumber() {
+            var phoneNumber = phoneNumberInput.value.trim();
+
+            // Create a regular expression pattern to match Philippine phone number formats
+            var phoneNumberPattern = /^(09|\+639)\d{9}$/;
+
+            if (phoneNumberPattern.test(phoneNumber)) {
+                validationMessage.textContent = "Valid phone number";
+                validationMessage.className = "valid";
+            } else {
+                validationMessage.textContent = "Invalid phone number";
+                validationMessage.className = "invalid";
+            }
+        }
+
+        // Add a click event listener to the validateButton
+        phoneNumberInput.addEventListener("click", validatePhoneNumber);
+    </script>
+    <script type="text/javascript">
+        $(".form-control").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}

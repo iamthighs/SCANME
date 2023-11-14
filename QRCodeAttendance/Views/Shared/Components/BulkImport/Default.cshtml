@@ -1,0 +1,27 @@
+﻿@model IEnumerable<Sample>
+
+<!-- Create Attendance Record modal-->
+<div class="modal fade" id="bulkImportModal" tabindex="-1" role="dialog" aria-labelledby="createGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createGroupModalLabel">Bulk Import</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Samples" asp-action="BulkImportSamples" method="post" enctype="multipart/form-data">
+            <div class="modal-body"> 
+                    <div class="mb-0">
+                        <label class="mb-1 small text-muted" for="formGroupName">Import Students Database (<code>.csv</code> & <code>.xlsx</code> only)</label>
+                        <input type="file" id="file" name="file" class="form-control" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required />
+                    </div>  
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-danger-soft text-danger" data-bs-dismiss="modal">Cancel</a>
+                <button class="btn btn-primary-soft text-primary" type="submit">Import</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

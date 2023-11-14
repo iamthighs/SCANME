@@ -1,0 +1,289 @@
+﻿@model IEnumerable<AttendanceRecord>
+
+@{
+    ViewData["Title"] = "Attendance Records";
+    ViewData["ActivePage"] = ManageSidebar.Attendance;
+}
+
+@{
+    bool recordsExist;
+
+    if (Model.Any())
+    {
+        recordsExist = true;
+    }
+    else
+    {
+        recordsExist = false;
+    }
+
+}
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<partial name="_NewNavbar" />
+<div id="layoutSidenav">
+    <partial name="_NewSidenav" />
+    <div id="layoutSidenav_content">
+        <main>
+            <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+                <partial name="_Notification" />
+                <div class="container-fluid px-4">
+                    <div class="page-header-content">
+                        <div class="row align-items-center justify-content-between pt-3">
+                            <div class="col-auto mb-3">
+                                <h1 class="page-header-title">
+                                    <div class="page-header-icon"><i data-feather="database"></i></div>
+                                    Attendance Records
+                                </h1>
+                            </div>
+                            <div class="col-12 col-xl-auto mb-3">
+                                <button class="btn btn-sm btn-light text-primary" type="button" data-bs-toggle="modal" data-bs-target="#createARModal">
+                                    <i class="me-1" data-feather="plus"></i>
+                                    Attendance Record
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Main page content-->
+            <div class="container-xl px-4 mt-4">
+                @if (recordsExist)
+                {
+                    <button class="btn btn-sm btn-red-soft text-danger" id="deleteButton" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" disabled>
+                        <i class="me-1" data-feather="trash"></i>
+                        Delete
+                    </button>
+                }
+                <!-- DataTales Example -->
+                <div class="mb-4 mt-2">
+                    <div class="card-body">
+                        <div id="preload" class="d-flex justify-content-center align-items-center">
+                            <div class="text-center">
+                                <div class="sr-only spinner-border" role="status">
+                                    <span class="sr-only"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive" style="height:50rem">
+                            <table class="table table-bordered" width="100%" id="example1">
+
+                                @if (Model.Count() == 0)
+                                {
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th></th>
+                                            <th>Title</th>
+                                            <th>Date</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                }
+                                else
+                                {
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th>
+                                                <input type="checkbox" class="form-check-input" id="selectAllCheckBox" />
+                                            </th>
+                                            <th>Title</th>
+                                            <th>Date</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @foreach (var user in Model)
+                                        {
+                                            <tr class="text-center">
+                                                <td><input type="checkbox" class="form-check-input recordCheckBox" name="selectedIds" value="@user.Id" data-id="@user.Id" /></td>
+                                                <td>@user.Title</td>
+                                                <td>
+                                                    @{
+                                                        var currentDate = DateTime.Now.Date;
+                                                        var userDate = user.DateCreated.Date;
+                                                        string dateDisplay;
+
+                                                        var daysDifference = (currentDate - userDate).Days;
+                                                        var monthsDifference = (currentDate.Year - userDate.Year) * 12 + currentDate.Month - userDate.Month;
+                                                        var yearsDifference = currentDate.Year - userDate.Year;
+                                                        var decadesDifference = yearsDifference / 10;
+
+                                                        if (currentDate == userDate)
+                                                        {
+                                                            dateDisplay = "Today";
+                                                        }
+                                                        else if (daysDifference <= 1)
+                                                        {
+                                                            dateDisplay = $"{daysDifference} day{(daysDifference != 1 ? "s" : "")} ago";
+                                                        }
+                                                        else if (monthsDifference < 1)
+                                                        {
+                                                            dateDisplay = $"{daysDifference} day{(daysDifference != 1 ? "s" : "")} ago";
+                                                        }
+                                                        else if (yearsDifference < 1)
+                                                        {
+                                                            dateDisplay = $"{monthsDifference} month{(monthsDifference != 1 ? "s" : "")} ago";
+                                                        }
+                                                        else if (decadesDifference < 1)
+                                                        {
+                                                            dateDisplay = $"{yearsDifference} year{(yearsDifference != 1 ? "s" : "")} ago";
+                                                        }
+                                                        else
+                                                        {
+                                                            dateDisplay = $"{decadesDifference} decade{(decadesDifference != 1 ? "s" : "")} ago";
+                                                        }
+                                                    }
+                                                    <div>@user.DateCreated.ToLongDateString() (@dateDisplay)</div>
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown no-caret">
+                                                        <button class="btn btn-datatable btn-transparent-dark btn-icon dropdown-toggle" id="itemDropdownExample" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="more-vertical"></i></button>
+                                                        <div class="dropdown-menu dropdown-menu-end animated--fade-in-up" aria-labelledby="itemDropdownExample">
+                                                            <a class="dropdown-item" href="#!">
+                                                                <div class="dropdown-item-icon"><i data-feather="camera"></i></div>
+                                                                Camera Surveillance
+                                                            </a>
+                                                            <a class="dropdown-item" asp-action="RecordForAttendance" asp-route-id="@user.Id">
+                                                                <div class="dropdown-item-icon"><i data-feather="maximize"></i></div>
+                                                                QR Code Scanner
+                                                            </a>
+                                                            <a class="dropdown-item" asp-action="Details" asp-route-id="@user.Id">
+                                                                <div class="dropdown-item-icon"><i data-feather="list"></i></div>
+                                                                Details
+                                                            </a>
+                                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editARModal_@user.Id" href="#!">
+                                                                <div class="dropdown-item-icon"><i data-feather="edit"></i></div>
+                                                                Edit
+                                                            </a>
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal_@user.Id" href="#!">
+                                                                <div class="dropdown-item-icon"><i data-feather="trash-2"></i></div>
+                                                                Delete
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!--Delete Modal -->
+                                            <div class="modal fade" id="deleteModal_@user.Id" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="exampleModalCenterTitle">Delete Attendance Record</h5>
+                                                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">Are you sure you want to delete @user.Title ?</div>
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                                                            <form class="form-inline" asp-action="Delete" asp-route-id="@user.Id" method="post">
+                                                                <button type="submit" class="btn btn-primary">Delete</button>
+                                                            </form>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                    </tbody>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @await Component.InvokeAsync("CreateRoleModal")
+            @await Component.InvokeAsync("EditRoleModal")
+        </main>
+        <partial name="_NewFooter" />
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Confirm Deletion</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">Are you sure you want to delete the selected records?</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-danger" type="button" id="confirmDeleteButton">Delete</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            // Function to enable or disable the "Delete" button based on selection
+            function toggleDeleteButton() {
+                if ($(".recordCheckBox:checked").length > 0) {
+                    $("#deleteButton").prop("disabled", false);
+                } else {
+                    $("#deleteButton").prop("disabled", true);
+                }
+
+                // Check the "Select All" checkbox when all checkboxes are manually checked
+                if ($(".recordCheckBox:checked").length === $(".recordCheckBox").length) {
+                    $("#selectAllCheckBox").prop("checked", true);
+                } else {
+                    $("#selectAllCheckBox").prop("checked", false);
+                }
+            }
+
+            $("#selectAllCheckBox").click(function () {
+                $(".recordCheckBox").prop("checked", $(this).prop("checked"));
+                toggleDeleteButton();
+            });
+
+            $(".recordCheckBox").click(function () {
+                toggleDeleteButton();
+            });
+
+            $("#deleteButton").click(function () {
+                deleteSelectedRecords();
+            });
+
+            function deleteSelectedRecords() {
+                var selectedIds = [];
+                $(".recordCheckBox:checked").each(function () {
+                    selectedIds.push($(this).data("id"));
+                });
+
+                if (selectedIds.length === 0) {
+                    alert("Select at least one record to delete.");
+                    return;
+                }
+
+                $("#confirmDeleteModal").modal("show");
+
+                $("#confirmDeleteButton").click(function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/AttendanceRecord/DeleteSelected",
+                        data: { selectedIds: selectedIds },
+                        success: function (data) {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert("Error deleting selected records.");
+                            }
+                        }
+                    });
+
+                    $("#confirmDeleteModal").modal("hide");
+                });
+            }
+        });
+    </script>
+
+}

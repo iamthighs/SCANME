@@ -1,0 +1,42 @@
+﻿@using QRCodeAttendance.Data
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppIdentityUser> SignInManager
+@inject UserManager<AppIdentityUser> UserManager
+
+<div id="layoutSidenav_nav">
+    <nav class="sidenav shadow-right sidenav-light">
+        <div class="sidenav-menu">
+            <div class="nav accordion" id="accordionSidenav">
+                <div class="sidenav-menu-heading">Overview</div>
+                <!-- Sidenav Link (Home)-->
+                <a class="nav-link @ManageSidebar.HomeNavClass(ViewContext)" asp-area="" asp-controller="Home" asp-action="Index">
+                    <div class="nav-link-icon"><i data-feather="home"></i></div>
+                    Home
+                </a>
+                <a class="nav-link @ManageSidebar.AttendanceNavClass(ViewContext)" asp-area="" asp-controller="AttendanceRecord" asp-action="Index">
+                    <div class="nav-link-icon"><i data-feather="database"></i></div>
+                    Attendance Records
+                </a>
+                <a class="nav-link @ManageSidebar.StudentNavClass(ViewContext)" asp-area="" asp-controller="Samples" asp-action="Index">
+                    <div class="nav-link-icon"><i data-feather="users"></i></div>
+                    Student's Database
+                </a>
+                <a class="nav-link @ManageSidebar.CameraNavClass(ViewContext)" asp-area="" asp-controller="CameraSurveillance" asp-action="Index">
+                    <div class="nav-link-icon"><i data-feather="camera"></i></div>
+                    Camera Surveillance
+                </a>
+            </div>
+        </div>
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <!-- Sidenav Footer-->
+            <div class="sidenav-footer">
+                <div class="sidenav-footer-content">
+                <div class="sidenav-footer-subtitle">Logged in as:</div>
+                <div class="sidenav-footer-title">@(User.FindFirst("UserFirstName").Value + " " + User.FindFirst("UserLastName").Value)</div>
+                </div>
+            </div>
+        }
+    </nav>
+</div>
+

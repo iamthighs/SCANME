@@ -1,0 +1,81 @@
+﻿@model IEnumerable<Sample>
+
+@foreach(var item in Model)
+{
+ <!-- Edit Attendance Record modal-->
+<div class="modal fade" id="editARModal_@item.Id" tabindex="-1" role="dialog" aria-labelledby="editARModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editARModalLabel">Edit</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form enctype="multipart/form-data" asp-controller="Samples" asp-action="Edit" asp-route-id="@item.Id" method="post">
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label class="mb-1 small text-muted" for="formTitle">Student No.</label>
+                    <input type="text" id="code_@item.Id" name="code" class="form-control" required value="@item.Code" />
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4">
+                        <label class="mb-1 small text-muted" for="formTitle">First Name</label>
+                        <input type="text" id="firstName_@item.Id" name="firstName" class="form-control" required value="@item.FirstName" />
+                    </div>
+                    <div class="col-4">
+                        <label class="mb-1 small text-muted" for="formTitle">Middle Name</label>
+                        <input type="text" id="middleName_@item.Id" name="middleName" class="form-control" required value="@item.MiddleName" />
+                    </div>
+                    <div class="col-4">
+                        <label class="mb-1 small text-muted" for="formTitle">Last Name</label>
+                        <input type="text" id="lastName_@item.Id" name="lastName" class="form-control" required value="@item.LastName" />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label class="mb-1 small text-muted" for="formGroupName">Sex</label>
+                        <select id="sex_@item.Id" name="sex" class="form-select" aria-label="Default select example" required value="@item.Sex.ToString()">
+                            <option value="" disabled>-- Select Sex --</option>
+                            <option value="0">Male</option>
+                            <option value="1">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="mb-1 small text-muted" for="formDate">Birth Date</label>
+                        <input type="date" id="birthDate_@item.Id" name="birthDate" class="form-control" required value="@item.BirthDate.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label class="mb-1 small text-muted" for="formGroupName">Department</label>
+                            <select id="department_@item.Id" name="department" class="form-select" aria-label="Default select example" required value="@item.Department.ToString()">
+                            <option value="" disabled>-- Select Department --</option>
+                            <option value="0">CIT</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="mb-1 small text-muted" for="formGroupName">Course</label>
+                        <input type="text" id="course_@item.Id" name="course" class="form-control" required value="@item.Course" />
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <input type="text" placeholder="Enter new imageUrl..." id="imageUrl_@item.Id" name="imageUrl" class="form-control" required hidden value="@item.ImageUrl" />
+                </div>
+                <div class="mb-2">
+                    <label class="mb-1 small text-muted" for="formGroupName">Student Profile (<code>.png</code> & <code>.jpg</code> only)</label>
+                    <input type="file" id="coverImage_@item.Id" name="coverImage" class="form-control" accept="image/png, image/jpeg" onChange="document.getElementById('CoverImagePrv_@item.Id').src = window.URL.createObjectURL(this.files[0])" />
+                </div>
+                <div class="mb-2 text-center">
+                    <img id="CoverImagePrv_@item.Id" class="img-account-profile rounded-circle" src="~/profile/@item.ImageUrl" alt="Student Profile" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger-soft text-danger" type="button" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary-soft text-primary" type="submit">Save Changes</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    
+}
